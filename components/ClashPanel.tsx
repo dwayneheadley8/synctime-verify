@@ -108,7 +108,7 @@ const ClashPanel: React.FC<ClashPanelProps> = ({ clashes, submitters, teamShifts
   }
 
   return (
-    <div className="w-full lg:w-80 shrink-0 lg:sticky lg:top-24 mt-8 lg:mt-0">
+    <div className="w-full lg:w-96 shrink-0 lg:sticky lg:top-24 mt-8 lg:mt-0">
       <div className="bg-white rounded-2xl border border-red-100 p-6 shadow-sm shadow-red-100/50">
         <div className="flex items-center gap-2 mb-6">
           <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse"></div>
@@ -116,19 +116,60 @@ const ClashPanel: React.FC<ClashPanelProps> = ({ clashes, submitters, teamShifts
         </div>
 
         <div className="space-y-4">
-          {clashes.map((clash) => (
-            <div key={clash.id} className="p-4 bg-red-50/50 border border-red-100 rounded-xl">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium text-slate-900 mb-1">Time Overlap</p>
-                  <p className="text-xs text-slate-600 leading-relaxed">
-                    {clash.message}
-                  </p>
+          {clashes.map((clash) => {
+            const [showLog, setShowLog] = React.useState(false);
+
+            return (
+              <div key={clash.id} className="p-4 bg-red-50/50 border border-red-100 rounded-xl">
+                <div className="flex items-start gap-3">
+                  <AlertCircle className="w-5 h-5 text-red-500 shrink-0 mt-0.5" />
+                  <div className="flex-grow min-w-0">
+                    <p className="text-sm font-medium text-slate-900 mb-1">Time Overlap</p>
+                    <p className="text-xs text-slate-600 leading-relaxed mb-3">
+                      {clash.message}
+                    </p>
+
+                    {clash.details && (
+                      <>
+                        <button
+                          onClick={() => setShowLog(!showLog)}
+                          className="text-[10px] font-bold uppercase tracking-wider text-primary-600 hover:text-primary-700 flex items-center gap-1 transition-colors"
+                        >
+                          {showLog ? 'Hide Extended Log' : 'Show Extended Log'}
+                        </button>
+
+                        {showLog && (
+                          <div className="mt-4 space-y-4 border-t border-red-100 pt-4 animate-fade-in">
+                            {/* User 1 Details */}
+                            <div className="space-y-1">
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{clash.details.user1.name} (Submission)</p>
+                              <div className="bg-white/60 p-2 rounded-lg border border-red-50">
+                                <p className="text-[11px] font-bold text-slate-900 mb-1">{clash.details.user1.time}</p>
+                                <p className="text-[11px] text-slate-600 italic leading-snug">
+                                  {clash.details.user1.description || 'No description provided'}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* User 2 Details */}
+                            <div className="space-y-1">
+                              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-tight">{clash.details.user2.name} (Submission)</p>
+                              <div className="bg-white/60 p-2 rounded-lg border border-red-50">
+                                <p className="text-[11px] font-bold text-slate-900 mb-1">{clash.details.user2.time}</p>
+                                <p className="text-[11px] text-slate-600 italic leading-snug">
+                                  {clash.details.user2.description || 'No description provided'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="mt-6 pt-6 border-t border-slate-100 flex flex-col gap-4">

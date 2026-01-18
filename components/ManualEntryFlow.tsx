@@ -99,8 +99,9 @@ const ManualEntryFlow: React.FC<ManualEntryFlowProps> = ({
       await Promise.all(promises);
       setSubmitSuccess(true);
       setTimeout(() => setSubmitSuccess(false), 5000);
-      setEntries([{ ...INITIAL_MANUAL_ENTRY, id: Date.now().toString() }]);
-      
+      // Removed clearing entries as per user request
+      // setEntries([{ ...INITIAL_MANUAL_ENTRY, id: Date.now().toString() }]);
+
       // Build shift objects for optimistic update
       const savedShifts: Shift[] = entries
         .filter(entry => entry.date && entry.arrivalTime && entry.departureTime)
@@ -115,7 +116,7 @@ const ManualEntryFlow: React.FC<ManualEntryFlowProps> = ({
           hoursWorked: entry.hoursWorked,
           description: entry.description
         }));
-      
+
       // Notify parent to refresh team shifts
       console.log('📤 Calling onShiftsSubmitted callback...');
       if (onShiftsSubmitted) {

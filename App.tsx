@@ -9,7 +9,7 @@ import AuthFlow from './components/AuthFlow';
 import TeamFlow from './components/TeamFlow';
 import { ViewState, Clash, WorkingPeriod, UserProfile, Shift } from './types';
 import { ChevronLeft } from './components/ui/Icons';
-import { getWorkingPeriods } from './utils/timeUtils';
+import { getWorkingPeriods, formatToRegularTime } from './utils/timeUtils';
 import { auth, db } from './services/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, collection, query, where, getDocs, deleteDoc, onSnapshot } from 'firebase/firestore';
@@ -44,7 +44,7 @@ const App: React.FC = () => {
 
           if (!userData.teamId) {
             setView(ViewState.TEAM);
-          } else if (view === ViewState.LANDING || view === ViewState.AUTH) {
+          } else if (view === ViewState.AUTH) {
             setView(ViewState.DASHBOARD);
           }
         } else {
@@ -102,13 +102,13 @@ const App: React.FC = () => {
 
   const refreshTeamShifts = async (newShifts?: Shift[]) => {
     console.log('🔄 refreshTeamShifts called', { teamId: user?.teamId, period: selectedPeriod?.label, newShiftsCount: newShifts?.length });
-    
+
     // Optimistic update: add new shifts immediately
     if (newShifts && newShifts.length > 0) {
       setTeamShifts(prev => [...prev, ...newShifts]);
       console.log('✨ Optimistically added', newShifts.length, 'shifts');
     }
-    
+
     if (!user?.teamId || !selectedPeriod) {
       console.warn('❌ Missing teamId or selectedPeriod', { teamId: user?.teamId, selectedPeriod });
       return;
@@ -138,7 +138,7 @@ const App: React.FC = () => {
           console.log('📄 Fetched shift:', { userId: data.userId, userName: data.userName, date: data.date });
         }
       });
-      
+
       console.log(`✅ Refreshed: ${fetchedShifts.length} shifts for period ${selectedPeriod.label}`);
       setTeamShifts(fetchedShifts);
     } catch (err) {
@@ -173,10 +173,10 @@ const App: React.FC = () => {
       await Promise.all(deletePromises);
 
       console.log(`✅ Deleted ${querySnapshot.docs.length} submissions for user ${userId}`);
-      
+
       // Update local state immediately
       setTeamShifts(prev => prev.filter(shift => shift.userId !== userId));
-      
+
       // Reset comparison if started
       if (comparisonStarted) {
         setComparisonStarted(false);
@@ -191,10 +191,10 @@ const App: React.FC = () => {
     // Detect clashes for all current shifts
     const allClashes: Clash[] = [];
     const submitters = getSubmitters();
-    
+
     submitters.forEach(submitter => {
       const userShifts = teamShifts.filter(s => s.userId === submitter.uid);
-      
+
       userShifts.forEach(shift => {
         // Check against shifts from OTHER users
         teamShifts.forEach(otherShift => {
@@ -211,16 +211,23 @@ const App: React.FC = () => {
             const otherEndMin = otherEnd[0] * 60 + otherEnd[1];
 
             if (shiftStartMin < otherEndMin && shiftEndMin > otherStartMin) {
-              // Format date for display (e.g., "Jan 26, 2026")
               const clashDate = new Date(shift.date + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-              
+
+              const timeRange1 = `${formatToRegularTime(shift.arrivalTime)} - ${formatToRegularTime(shift.departureTime)}`;
+              const timeRange2 = `${formatToRegularTime(otherShift.arrivalTime)} - ${formatToRegularTime(otherShift.departureTime)}`;
+
               allClashes.push({
                 id: `clash_${Date.now()}_${Math.random()}`,
                 entryId: shift.id || '',
                 conflictingUser: otherShift.userName,
-                conflictingTime: `${otherShift.arrivalTime} - ${otherShift.departureTime}`,
-                message: `On ${clashDate}: ${submitter.name} (${shift.arrivalTime} - ${shift.departureTime}) overlaps with ${otherShift.userName} (${otherShift.arrivalTime} - ${otherShift.departureTime})`,
-                severity: 'critical'
+                conflictingTime: timeRange2,
+                message: `On ${clashDate}: ${submitter.name} (${timeRange1}) overlaps with ${otherShift.userName} (${timeRange2})`,
+                severity: 'critical',
+                details: {
+                  user1: { name: submitter.name, time: timeRange1, description: shift.description },
+                  user2: { name: otherShift.userName, time: timeRange2, description: otherShift.description },
+                  date: clashDate
+                }
               });
             }
           }
@@ -257,7 +264,13 @@ const App: React.FC = () => {
 
   // If on Landing Page, render full screen component without Layout wrapper
   if (view === ViewState.LANDING) {
-    return <LandingPage onGetStarted={() => setView(user ? (user.teamId ? ViewState.DASHBOARD : ViewState.TEAM) : ViewState.AUTH)} />;
+    return (
+      <LandingPage
+        onGetStarted={() => setView(user ? (user.teamId ? ViewState.DASHBOARD : ViewState.TEAM) : ViewState.AUTH)}
+        userProfile={user}
+        onGoToDashboard={() => setView(ViewState.DASHBOARD)}
+      />
+    );
   }
 
   // If on Auth Page, render full screen without Layout wrapper
@@ -296,8 +309,8 @@ const App: React.FC = () => {
                 onShiftsSubmitted={refreshTeamShifts}
               />
             </div>
-            <ClashPanel 
-              clashes={activeClashes} 
+            <ClashPanel
+              clashes={activeClashes}
               submitters={getSubmitters()}
               teamShifts={teamShifts}
               onBeginComparison={handleBeginComparison}
@@ -332,8 +345,8 @@ const App: React.FC = () => {
                 onShiftsSubmitted={refreshTeamShifts}
               />
             </div>
-            <ClashPanel 
-              clashes={activeClashes} 
+            <ClashPanel
+              clashes={activeClashes}
               submitters={getSubmitters()}
               teamShifts={teamShifts}
               onBeginComparison={handleBeginComparison}
@@ -360,9 +373,7 @@ const App: React.FC = () => {
     <Layout
       activeView={view}
       onNavigateHome={() => {
-        if (user && user.teamId) setView(ViewState.DASHBOARD);
-        else if (user) setView(ViewState.TEAM);
-        else setView(ViewState.LANDING);
+        setView(ViewState.LANDING);
         setActiveClashes([]);
       }}
       userProfile={user}

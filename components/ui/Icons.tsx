@@ -28,7 +28,10 @@ import {
   Loader2,
   Users,
   LogOut,
-  X
+  X,
+  Edit2,
+  ShieldCheck,
+  Layers
 } from 'lucide-react';
 
 export {
@@ -60,5 +63,8 @@ export {
   Loader2,
   Users,
   LogOut,
-  X
+  X,
+  Edit2,
+  ShieldCheck,
+  Layers
 };

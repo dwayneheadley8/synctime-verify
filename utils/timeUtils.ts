@@ -42,8 +42,8 @@ export const detectClashesForEntry = (entry: TimesheetEntry, existingShifts: Shi
           id: `clash_${Date.now()}_${Math.random()}`,
           entryId: entry.id,
           conflictingUser: existing.userName,
-          conflictingTime: `${existing.arrivalTime} - ${existing.departureTime}`,
-          message: `Overlaps with ${existing.userName} (${existing.arrivalTime} - ${existing.departureTime})`,
+          conflictingTime: `${formatToRegularTime(existing.arrivalTime)} - ${formatToRegularTime(existing.departureTime)}`,
+          message: `Overlaps with ${existing.userName} (${formatToRegularTime(existing.arrivalTime)} - ${formatToRegularTime(existing.departureTime)})`,
           severity: 'warning'
         });
       }
@@ -88,4 +88,12 @@ export const getWorkingPeriods = (count: number = 12, year: number = 2026): Work
   }
 
   return periods;
+};
+
+export const formatToRegularTime = (militaryTime: string): string => {
+  if (!militaryTime) return '';
+  const [hours, minutes] = militaryTime.split(':').map(Number);
+  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const displayHours = hours % 12 || 12;
+  return `${displayHours}:${minutes.toString().padStart(2, '0')} ${ampm}`;
 };

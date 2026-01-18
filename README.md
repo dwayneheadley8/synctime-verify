@@ -53,6 +53,21 @@ SyncTime Verify is a collaborative timesheet management and clash detection tool
 
 **Solution**: Changed the visibility check from `activeClashes.length > 0` to `getSubmitters().length > 0`. Now all team members see the clash detection interface regardless of their role.
 
+### Challenge 6: PDF Extraction Skips with Additional Columns
+**Problem**: The PDF parser was skipping rows that contained additional text (like "OUT" and "IN" in a lunch column) between the arrival and departure times. This happened because the regex pattern was too strict, expecting only whitespace between consecutive time matches.
+
+**Solution**: Updated the `dateTimePattern` regex in `documentParser.ts` to use non-greedy matching `(?:\s+[\s\S]*?)?` between the date and the times. This allows the parser to gracefully ignore any "noise" or additional columns (like Lunch) while still capturing the core arrival and departure data on each row.
+
+### Challenge 7: Out-of-Order PDF Text Extraction
+**Problem**: During the Admin Batch Portal implementation, extracting the "Worker Name" and "Position" was failing or returning incorrect labels (e.g., "DATE ARRIVAL"). This occurred because PDF text elements are often stored in the file stream out of their visual reading order.
+
+**Solution**: Re-engineered the PDF extraction logic to sort all text items by their visual coordinates (`y` for top-to-bottom, then `x` for left-to-right) before joining them into a string. This visually reconstructs the page's layout in memory, ensuring that labels like "NAME OF STUDENT" are correctly followed by the actual worker data.
+
+### Challenge 8: Admin Portal White-Screen Crash
+**Problem**: Processing multiple timesheets in the Admin Batch Portal caused the application to crash (white screen). This was a "Rules of Hooks" violation where `useState` was being called inside a `.map()` loop while rendering clash cards.
+
+**Solution**: Refactored the clash card into a standalone `BatchClashCard` component. This ensures that each card manages its own internal state (`expanded`) correctly within the React component lifecycle, maintaining application stability even with hundreds of detected conflicts.
+
 ## Getting Started
 
 ### Prerequisites

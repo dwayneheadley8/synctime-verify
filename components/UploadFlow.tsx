@@ -33,15 +33,15 @@ const UploadFlow: React.FC<UploadFlowProps> = ({
   onShiftsSubmitted
 }) => {
   const [activeTab, setActiveTab] = useState<TabType>('csv');
-  
+
   // CSV state
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const csvInputRef = useRef<HTMLInputElement>(null);
-  
+
   // PDF state
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const pdfInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Shared state
   const [extractedEntries, setExtractedEntries] = useState<ParsedEntry[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -86,11 +86,11 @@ const UploadFlow: React.FC<UploadFlowProps> = ({
 
     try {
       console.log('📕 Calling parsePDF...');
-      const entries = await parsePDF(file);
-      console.log('📕 parsePDF returned:', entries);
-      if (entries.length > 0) {
-        console.log(`📕 Successfully extracted ${entries.length} entries`);
-        setExtractedEntries(entries);
+      const result = await parsePDF(file);
+      console.log('📕 parsePDF returned:', result);
+      if (result.entries.length > 0) {
+        console.log(`📕 Successfully extracted ${result.entries.length} entries for ${result.worker.name}`);
+        setExtractedEntries(result.entries);
       } else {
         console.log('📕 No entries found in PDF');
         setError('No valid timesheet entries found in PDF.');
@@ -141,7 +141,7 @@ const UploadFlow: React.FC<UploadFlowProps> = ({
       setExtractedEntries([]);
       setCsvFile(null);
       setPdfFile(null);
-      
+
       // Build shift objects for optimistic update
       const savedShifts: Shift[] = extractedEntries
         .filter(entry => entry.date && entry.arrivalTime && entry.departureTime)
@@ -156,7 +156,7 @@ const UploadFlow: React.FC<UploadFlowProps> = ({
           hoursWorked: entry.hoursWorked,
           description: 'Uploaded via document'
         }));
-      
+
       // Notify parent to refresh team shifts
       console.log('📤 Calling onShiftsSubmitted callback with shifts:', savedShifts);
       if (onShiftsSubmitted) {
@@ -231,11 +231,10 @@ const UploadFlow: React.FC<UploadFlowProps> = ({
               setActiveTab(tab);
               resetFlow();
             }}
-            className={`px-6 py-3 font-semibold transition-all border-b-2 ${
-              activeTab === tab
+            className={`px-6 py-3 font-semibold transition-all border-b-2 ${activeTab === tab
                 ? 'text-primary-600 border-primary-600'
                 : 'text-slate-600 border-transparent hover:text-slate-900'
-            }`}
+              }`}
           >
             {tab === 'csv' && '📄 CSV Upload'}
             {tab === 'pdf' && '📕 PDF Upload'}

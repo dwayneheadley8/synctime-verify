@@ -8,6 +8,24 @@ export interface TimesheetEntry {
   hasClash?: boolean;
 }
 
+export interface ParsedEntry {
+  date: string;
+  arrivalTime: string;
+  departureTime: string;
+  hoursWorked: number;
+}
+
+export interface WorkerMetadata {
+  name: string;
+  position: string;
+}
+
+export interface BatchParsedResult {
+  fileName: string;
+  worker: WorkerMetadata;
+  entries: ParsedEntry[];
+}
+
 export interface Clash {
   id: string;
   entryId: string;
@@ -15,6 +33,11 @@ export interface Clash {
   conflictingTime: string;
   message: string;
   severity: 'warning' | 'critical';
+  details?: {
+    user1: { name: string; time: string; description: string };
+    user2: { name: string; time: string; description: string };
+    date: string;
+  };
 }
 
 export enum ViewState {

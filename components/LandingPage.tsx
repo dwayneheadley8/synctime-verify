@@ -12,11 +12,18 @@ import {
   AlertCircle,
   Play,
   Pause,
-  ChevronDown
+  ChevronDown,
+  LogOut,
+  Users
 } from './ui/Icons';
+import { signOut } from 'firebase/auth';
+import { auth } from '../services/firebase';
+import { UserProfile } from '../types';
 
 interface LandingPageProps {
   onGetStarted: () => void;
+  userProfile?: UserProfile | null;
+  onGoToDashboard?: () => void;
 }
 
 // --- Visual Components ---
@@ -278,9 +285,17 @@ const SLIDE_DURATION = 6000; // 6 seconds
 
 // --- Main Component ---
 
-const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
+const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, userProfile, onGoToDashboard }) => {
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
+
+  const handleSignOut = async () => {
+    try {
+      await signOut(auth);
+    } catch (err) {
+      console.error("Logout error:", err);
+    }
+  };
 
   // Auto-advance logic
   useEffect(() => {
@@ -319,19 +334,50 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted }) => {
 
           <div className="flex items-center gap-6">
             <Search className="w-5 h-5 text-gray-300 hover:text-white cursor-pointer" />
-            <Globe className="w-5 h-5 text-gray-300 hover:text-white cursor-pointer" />
-            <button
-              onClick={(e) => { e.preventDefault(); onGetStarted(); }}
-              className="hidden md:block text-[15px] font-medium hover:text-[#82e761] transition-colors bg-transparent border-none cursor-pointer"
-            >
-              Sign In
-            </button>
-            <button
-              onClick={onGetStarted}
-              className="bg-[#82e761] hover:bg-[#6fd650] text-[#031b29] px-6 py-2.5 rounded-full text-[15px] font-semibold transition-all shadow-[0_0_15px_rgba(130,231,97,0.3)]"
-            >
-              Get Started
-            </button>
+
+            {userProfile ? (
+              <>
+                <button
+                  onClick={onGoToDashboard}
+                  className="hidden md:block text-[15px] font-medium hover:text-[#82e761] transition-colors bg-transparent border-none cursor-pointer"
+                >
+                  Go to Dashboard
+                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={onGoToDashboard}
+                    className="w-10 h-10 bg-white/10 rounded-full flex items-center justify-center border border-white/20 hover:bg-white/20 transition-all group"
+                    title={userProfile.name}
+                  >
+                    <span className="text-sm font-semibold text-white group-hover:scale-110 transition-transform">
+                      {userProfile.name?.charAt(0) || 'U'}
+                    </span>
+                  </button>
+                  <button
+                    onClick={handleSignOut}
+                    className="p-2 text-gray-400 hover:text-red-400 transition-colors"
+                    title="Sign Out"
+                  >
+                    <LogOut className="w-5 h-5" />
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <button
+                  onClick={onGetStarted}
+                  className="hidden md:block text-[15px] font-medium hover:text-[#82e761] transition-colors bg-transparent border-none cursor-pointer"
+                >
+                  Sign In
+                </button>
+                <button
+                  onClick={onGetStarted}
+                  className="bg-[#82e761] hover:bg-[#6fd650] text-[#031b29] px-6 py-2.5 rounded-full text-[15px] font-semibold transition-all shadow-[0_0_15px_rgba(130,231,97,0.3)]"
+                >
+                  Get Started
+                </button>
+              </>
+            )}
           </div>
         </div>
       </nav>
