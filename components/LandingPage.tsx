@@ -14,7 +14,19 @@ import {
   Pause,
   ChevronDown,
   LogOut,
-  Users
+  Users,
+  Car,
+  Landmark,
+  Package,
+  HeartPulse,
+  Dna,
+  HeartHandshake,
+  ShoppingCart,
+  Radio,
+  ClipboardCheck,
+  ChevronLeft,
+  ArrowRight,
+  ArrowLeft
 } from './ui/Icons';
 import { signOut } from 'firebase/auth';
 import { auth } from '../services/firebase';
@@ -178,7 +190,7 @@ const BrandsSection = () => {
   return (
     <section className="bg-[#031b29] pt-16 pb-32 px-6 overflow-hidden">
       <div className="max-w-[1400px] mx-auto text-center">
-        <h2 className="text-4xl lg:text-6xl font-extrabold mb-16 text-white tracking-tighter leading-tight">
+        <h2 className="text-4xl lg:text-6xl font-extrabold font-montserrat mb-16 text-white tracking-tighter leading-tight">
           The <span className="text-[#82e761]">World</span> works with SyncTime
         </h2>
 
@@ -280,6 +292,278 @@ const SLIDES = [
     layout: 'stacked'
   }
 ];
+
+const IndustrySection = () => {
+  const industries = [
+    { name: 'Automotive', icon: Car },
+    { name: 'Banking', icon: Landmark },
+    { name: 'Consumer Packaged Goods', icon: Package },
+    { name: 'Government', icon: Landmark },
+    { name: 'Healthcare', icon: HeartPulse },
+    { name: 'Insurance', icon: ClipboardCheck },
+    { name: 'Life Sciences', icon: Dna },
+    { name: 'Nonprofit', icon: HeartHandshake },
+    { name: 'Retail', icon: ShoppingCart },
+    { name: 'Technology', icon: Monitor },
+    { name: 'Telecom', icon: Radio },
+  ];
+
+  return (
+    <section className="bg-white py-24 px-6">
+      <div className="max-w-[1400px] mx-auto">
+        <h2 className="text-3xl lg:text-4xl font-bold text-[#031b29] text-center mb-16">
+          One platform, any industry
+        </h2>
+        <div className="flex flex-wrap justify-center gap-4 lg:gap-6">
+          {industries.map((industry, i) => (
+            <div key={i} className="flex items-center gap-4 px-6 py-4 bg-white border border-gray-200 rounded-full shadow-sm hover:shadow-md transition-all group cursor-default">
+              <div className="w-10 h-10 rounded-full bg-slate-100 flex items-center justify-center group-hover:bg-[#82e761]/10 transition-colors">
+                <industry.icon className="w-5 h-5 text-gray-800 group-hover:text-[#2ecc71] transition-colors" />
+              </div>
+              <span className="font-bold text-gray-800 text-base">{industry.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+};
+
+const STORY_SLIDES = [
+  {
+    company: 'Uber',
+    metric: '48K',
+    description: 'drivers successfully onboarded in one day with AI verification',
+    bgImage: 'https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&q=80&w=1200',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/c/cc/Uber_logo_2018.png/1200px-Uber_logo_2018.png',
+    color: '#000000',
+    hasWatchVideo: true,
+    hasLearnMore: false
+  },
+  {
+    company: 'Delta',
+    metric: '72%',
+    description: 'of scheduling conflicts resolved before flight crew impact',
+    bgImage: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?auto=format&fit=crop&q=80&w=1200',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/d/d1/Delta_logo.svg/1200px-Delta_logo.svg.png',
+    color: '#E01933',
+    hasWatchVideo: true,
+    hasLearnMore: true
+  },
+  {
+    company: 'Google',
+    metric: '2.5M+',
+    description: 'queries optimized through SyncTime workplace automation',
+    bgImage: 'https://images.unsplash.com/photo-1576086213369-97a306d36557?auto=format&fit=crop&q=80&w=1200',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/1200px-Google_2015_logo.svg.png',
+    color: '#4285F4',
+    hasWatchVideo: true,
+    hasLearnMore: false
+  },
+  {
+    company: 'Microsoft',
+    metric: '15%',
+    description: 'increase in team productivity across global cloud ops',
+    bgImage: 'https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&q=80&w=1200',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/96/Microsoft_logo_%282012%29.svg/1200px-Microsoft_logo_%282012%29.svg.png',
+    color: '#00A4EF',
+    hasWatchVideo: true,
+    hasLearnMore: true
+  },
+  {
+    company: 'Amazon',
+    metric: '30%',
+    description: 'reduction in administrative handle time for logistics partners',
+    bgImage: 'https://images.unsplash.com/photo-1549443163-355415d4ce7c?auto=format&fit=crop&q=80&w=1200',
+    logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/a/a9/Amazon_logo.svg/1200px-Amazon_logo.svg.png',
+    color: '#FF9900',
+    hasWatchVideo: true,
+    hasLearnMore: false
+  }
+];
+
+interface StorySliderProps {
+  activeStory: number;
+  setActiveStory: (index: number) => void;
+  progress: number;
+  setProgress: (val: number) => void;
+  isPlaying: boolean;
+}
+
+const StorySlider: React.FC<StorySliderProps> = ({ activeStory, setActiveStory, progress, setProgress, isPlaying }) => {
+  return (
+    <div className="w-full mt-16 group/slider">
+      {/* Main Slide Area */}
+      <div className="relative h-[600px] rounded-[32px] overflow-hidden mb-12 shadow-2xl">
+        {STORY_SLIDES.map((story, index) => {
+          const isActive = index === activeStory;
+          return (
+            <div
+              key={index}
+              className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${isActive ? 'opacity-100 z-10' : 'opacity-0 z-0'}`}
+            >
+              {/* Background Image with Ken Burns effect */}
+              <div className={`absolute inset-0 scale-105 ${isActive ? 'animate-ken-burns' : ''}`}>
+                <img
+                  src={story.bgImage}
+                  className="w-full h-full object-cover"
+                  alt={story.company}
+                />
+                <div className="absolute inset-0 bg-black/40 backdrop-blur-[1px]"></div>
+              </div>
+
+              {/* Floating Card */}
+              <div className={`absolute top-1/2 -translate-y-1/2 right-12 lg:right-24 w-full max-w-lg transition-all duration-1000 delay-300 ${isActive ? 'translate-y-[-50%] opacity-100' : 'translate-y-[-40%] opacity-0'}`}>
+                <div className="bg-[#1a2b3c]/90 backdrop-blur-xl p-10 lg:p-14 rounded-[40px] border border-white/10 shadow-3xl">
+                  <div className="bg-white/10 w-fit px-6 py-3 rounded-2xl mb-8 flex items-center justify-center">
+                    <img src={story.logo} className="h-8 w-auto object-contain brightness-0 invert" alt={story.company} />
+                  </div>
+
+                  <div className="mb-8">
+                    <h3 className="text-7xl lg:text-[100px] font-black font-montserrat text-white leading-none mb-4">
+                      {story.metric}
+                    </h3>
+                    <p className="text-xl lg:text-2xl text-gray-200 font-medium leading-snug">
+                      {story.description}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-6">
+                    {story.hasWatchVideo && (
+                      <button className="flex items-center gap-4 text-white hover:text-[#82e761] transition-colors group/btn w-fit">
+                        <div className="w-12 h-12 rounded-full border-2 border-white/30 flex items-center justify-center group-hover/btn:border-[#82e761] transition-all">
+                          <Play className="w-5 h-5 fill-current" />
+                        </div>
+                        <span className="text-lg font-bold tracking-tight">Watch Video</span>
+                      </button>
+                    )}
+                    {story.hasLearnMore && (
+                      <button className="flex items-center gap-4 text-white hover:text-[#82e761] transition-colors group/btn w-fit">
+                        <div className="w-12 h-12 rounded-full border-2 border-white/30 flex items-center justify-center group-hover/btn:border-[#82e761] transition-all">
+                          <ArrowRight className="w-5 h-5" />
+                        </div>
+                        <span className="text-lg font-bold tracking-tight">Learn More</span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Navigation & Progress Row */}
+      <div className="grid grid-cols-5 gap-8">
+        {STORY_SLIDES.map((story, index) => (
+          <div
+            key={index}
+            className="cursor-pointer group/nav"
+            onClick={() => {
+              setActiveStory(index);
+              setProgress(0);
+            }}
+          >
+            {/* Progress Bar Container */}
+            <div className="h-0.5 bg-gray-200 w-full mb-6 overflow-hidden">
+              <div
+                className="h-full transition-all duration-50"
+                style={{
+                  width: activeStory === index ? `${progress}%` : '0%',
+                  backgroundColor: activeStory === index ? story.color : '#e2e8f0'
+                }}
+              ></div>
+            </div>
+            {/* Logo */}
+            <div className={`p-4 transition-all duration-300 flex justify-center opacity-50 group-hover/nav:opacity-100 ${activeStory === index ? 'opacity-100' : ''}`}>
+              <img src={story.logo} className="h-8 lg:h-12 w-auto object-contain" alt={story.company} />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const CustomerStoriesSection = () => {
+  const [activeStory, setActiveStory] = useState(0);
+  const [progress, setProgress] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(true);
+
+  useEffect(() => {
+    let timer: any;
+    if (isPlaying) {
+      timer = setInterval(() => {
+        setProgress((prev) => {
+          if (prev >= 100) {
+            setActiveStory((curr) => (curr + 1) % STORY_SLIDES.length);
+            return 0;
+          }
+          return prev + 1;
+        });
+      }, 50); // 5 seconds per slide
+    }
+    return () => clearInterval(timer);
+  }, [activeStory, isPlaying]);
+
+  const handlePrev = () => {
+    setActiveStory((prev) => (prev - 1 + STORY_SLIDES.length) % STORY_SLIDES.length);
+    setProgress(0);
+  };
+
+  const handleNext = () => {
+    setActiveStory((prev) => (prev + 1) % STORY_SLIDES.length);
+    setProgress(0);
+  };
+
+  return (
+    <section className="bg-white pt-12 pb-32 px-6">
+      <div className="max-w-[1400px] mx-auto">
+        <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-12">
+          <div className="max-w-4xl">
+            <h2 className="text-5xl lg:text-[84px] font-extrabold font-montserrat text-[#031b29] leading-[0.9] tracking-tighter mb-12">
+              When our customers work, the world works
+            </h2>
+            <button className="bg-[#82e761] hover:bg-[#6fd650] text-[#031b29] px-10 py-5 rounded-full text-xl font-bold transition-all shadow-lg hover:scale-105 active:scale-95">
+              See All Customer Stories
+            </button>
+          </div>
+
+          <div className="flex items-center gap-4 mb-4 lg:mb-0">
+            <button
+              onClick={() => setIsPlaying(!isPlaying)}
+              className="w-16 h-16 rounded-full border-2 border-slate-900 flex items-center justify-center text-slate-900 hover:bg-slate-50 transition-all"
+              aria-label={isPlaying ? "Pause" : "Play"}
+            >
+              {isPlaying ? <Pause className="w-6 h-6 fill-current" /> : <Play className="w-6 h-6 fill-current ml-1" />}
+            </button>
+            <button
+              onClick={handlePrev}
+              className="w-16 h-16 rounded-full border-2 border-slate-900 flex items-center justify-center text-slate-900 hover:bg-gray-50 transition-all"
+            >
+              <ChevronLeft className="w-6 h-6 stroke-[3]" />
+            </button>
+            <button
+              onClick={handleNext}
+              className="w-16 h-16 rounded-full border-2 border-slate-900 flex items-center justify-center text-slate-900 hover:bg-gray-50 transition-all"
+            >
+              <ArrowRight className="w-6 h-6 stroke-[3]" />
+            </button>
+          </div>
+        </div>
+
+        {/* Specialized Story Slider */}
+        <StorySlider
+          activeStory={activeStory}
+          setActiveStory={setActiveStory}
+          progress={progress}
+          setProgress={setProgress}
+          isPlaying={isPlaying}
+        />
+      </div>
+    </section>
+  );
+};
 
 const SLIDE_DURATION = 6000; // 6 seconds
 
@@ -493,6 +777,8 @@ const LandingPage: React.FC<LandingPageProps> = ({ onGetStarted, userProfile, on
         </div>
       </main>
       <BrandsSection />
+      <IndustrySection />
+      <CustomerStoriesSection />
     </div>
   );
 };

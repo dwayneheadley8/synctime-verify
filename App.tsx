@@ -283,91 +283,30 @@ const App: React.FC = () => {
     return <TeamFlow onTeamJoined={handleTeamJoined} onBackToLanding={() => setView(ViewState.LANDING)} />;
   }
 
-  const renderContent = () => {
-    switch (view) {
-      case ViewState.UPLOAD:
-        return (
-          <div className={`flex flex-col ${getSubmitters().length > 0 ? 'lg:flex-row' : 'w-full'} gap-8 items-start`}>
-            <div className="flex-grow w-full">
-              <div className="mb-6">
-                <button
-                  onClick={() => { setView(ViewState.DASHBOARD); setActiveClashes([]); }}
-                  className="flex items-center text-sm text-slate-500 hover:text-slate-900 transition-colors"
-                >
-                  <ChevronLeft className="w-4 h-4 mr-1" /> Back to Dashboard
-                </button>
-              </div>
-              <UploadFlow
-                onClashesDetected={handleClashesUpdate}
-                periods={periods}
-                selectedPeriod={selectedPeriod}
-                onPeriodChange={setSelectedPeriod}
-                selectedYear={selectedYear}
-                onYearChange={setSelectedYear}
-                teamShifts={teamShifts}
-                userProfile={user}
-                onShiftsSubmitted={refreshTeamShifts}
-              />
-            </div>
-            <ClashPanel
-              clashes={activeClashes}
-              submitters={getSubmitters()}
-              teamShifts={teamShifts}
-              onBeginComparison={handleBeginComparison}
-              comparisonStarted={comparisonStarted}
-              currentUserId={user?.uid}
-              onDeleteSubmission={deleteUserSubmissions}
-              onResetComparison={handleResetComparison}
-            />
-          </div>
-        );
-      case ViewState.MANUAL:
-        return (
-          <div className={`flex flex-col ${getSubmitters().length > 0 ? 'lg:flex-row' : 'w-full'} gap-8 items-start`}>
-            <div className="flex-grow w-full">
-              <div className="mb-6">
-                <button
-                  onClick={() => { setView(ViewState.DASHBOARD); setActiveClashes([]); setComparisonStarted(false); }}
-                  className="flex items-center text-sm text-slate-500 hover:text-slate-900 transition-colors"
-                >
-                  <ChevronLeft className="w-4 h-4 mr-1" /> Back to Dashboard
-                </button>
-              </div>
-              <ManualEntryFlow
-                onClashesUpdate={handleClashesUpdate}
-                periods={periods}
-                selectedPeriod={selectedPeriod}
-                onPeriodChange={setSelectedPeriod}
-                selectedYear={selectedYear}
-                onYearChange={setSelectedYear}
-                teamShifts={teamShifts}
-                userProfile={user}
-                onShiftsSubmitted={refreshTeamShifts}
-              />
-            </div>
-            <ClashPanel
-              clashes={activeClashes}
-              submitters={getSubmitters()}
-              teamShifts={teamShifts}
-              onBeginComparison={handleBeginComparison}
-              comparisonStarted={comparisonStarted}
-              currentUserId={user?.uid}
-              onDeleteSubmission={deleteUserSubmissions}
-              onResetComparison={handleResetComparison}
-            />
-          </div>
-        );
-      case ViewState.DASHBOARD:
-      default:
-        return (
-          <Dashboard
-            onSelectUpload={() => setView(ViewState.UPLOAD)}
-            onSelectManual={() => setView(ViewState.MANUAL)}
-            userProfile={user}
-          />
-        );
-    }
-  };
+  // Dashboard, Upload, and Manual views use the new overhauled Dashboard layout
+  if (view === ViewState.DASHBOARD || view === ViewState.UPLOAD || view === ViewState.MANUAL) {
+    return (
+      <Dashboard
+        activeView={view}
+        setView={(v) => setView(v as ViewState)}
+        userProfile={user}
+        periods={periods}
+        selectedPeriod={selectedPeriod}
+        onPeriodChange={setSelectedPeriod}
+        selectedYear={selectedYear}
+        onYearChange={setSelectedYear}
+        teamShifts={teamShifts}
+        onShiftsSubmitted={refreshTeamShifts}
+        activeClashes={activeClashes}
+        handleClashesUpdate={handleClashesUpdate}
+        handleBeginComparison={handleBeginComparison}
+        comparisonStarted={comparisonStarted}
+        deleteUserSubmissions={deleteUserSubmissions}
+        handleResetComparison={handleResetComparison}
+        onNavigateHome={() => setView(ViewState.LANDING)}
+      />
+    );
+  }
 
   return (
     <Layout
@@ -378,7 +317,10 @@ const App: React.FC = () => {
       }}
       userProfile={user}
     >
-      {renderContent()}
+      {/* This Layout is now only for views that haven't been migrated to the new Dashboard layout */}
+      <div className="flex items-center justify-center py-20">
+        <p className="text-slate-500">View not found or being migrated.</p>
+      </div>
     </Layout>
   );
 };
